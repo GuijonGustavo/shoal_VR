@@ -11,7 +11,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "Actor_manipulador.h"
+#include "ActorManipulador.h"
 #include "PawnPez.generated.h"
 
 
@@ -204,7 +204,7 @@ public:
 	float minZ;
 
 	/** Constructor */
-	AFlockFish(const FObjectInitializer& ObjectInitializer);
+	APawnPez(const FObjectInitializer& ObjectInitializer);
 
 	// Getters and Setters
 	FVector getSeekTarget()
@@ -212,7 +212,7 @@ public:
 		return target;
 	}
 
-	void setState(class FishState* newState)
+	void setState(class NoneCardumen* newState)
 	{
 		currentState = newState;
 	}

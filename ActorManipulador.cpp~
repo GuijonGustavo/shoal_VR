@@ -63,7 +63,7 @@ void AActorManipulador::setup()
 				APawnPez *leaderFish = NULL;
 				for (int j = 0; j < numInFlock[i]; j++)
 				{
-					APawnPez *aFish = Cast<APawnPez>(world->SpawnActor(flockTypes[i]));
+					APawnPez *aFish = Cast<AFlockFish>(world->SpawnActor(flockTypes[i]));
 					aFish->isLeader = false;
 					aFish->DebugMode = DebugMode;
 					aFish->underwaterMax = FVector(maxX, maxY, maxZ);

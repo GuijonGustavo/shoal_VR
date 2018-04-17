@@ -1,5 +1,5 @@
 /*=================================================
-* FileName: Cardumen.h
+* FileName: NoneCardumen.h
 * 
 * Created by: Gustavo Magallanes Guijón
 * Project name: Cardumen
@@ -25,15 +25,15 @@ class APawnPez;
 //////////////            Fish State		          /////////////////////                                 
 //////////////                                        ////////////////////              
 /////////////////////////////////////////////////////////////////////////
-class Cardumen
+class NoneCardumen
 {
 protected:
 	APawnPez* Fish;
 
 public:
 	// Constructors
-	Cardumen(){}
-	Cardumen(APawnPez* aFish)
+	NoneCardumen(){}
+	NoneCardumen(APawnPez* aFish)
 	{
 		Fish = aFish;
 	};
@@ -48,11 +48,11 @@ public:
 //////////////                                        ////////////////////              
 /////////////////////////////////////////////////////////////////////////
 
-class SeekState : public FishState
+class SeekState : public NoneCardumen
 {
 public:
 
-	SeekState(APawnPez* aFish) : Cardumen(aFish){};
+	SeekState(APawnPez* aFish) : NoneCardumen(aFish){};
 	virtual void Update(float delta) override;
 
 protected:
@@ -68,14 +68,14 @@ protected:
 //////////////                                        ////////////////////              
 /////////////////////////////////////////////////////////////////////////
 
-class FleeState : public Cardumen
+class FleeState : public NoneCardumen
 {
 protected:
 	AActor* Enemy;
 
 public:
 
-	FleeState(AFlockFish* aFish, AActor* aEnemy) : Cardumen(aFish)
+	FleeState(APawnPez* aFish, AActor* aEnemy) : NoneCardumen(aFish)
 	{
 		Enemy = aEnemy;
 	};
@@ -94,14 +94,14 @@ protected:
 //////////////                                        ////////////////////              
 /////////////////////////////////////////////////////////////////////////
 
-class ChaseState : public Cardumen
+class ChaseState : public NoneCardumen
 {
 protected:
 	AActor* Prey;
 
 public:
 
-	ChaseState(AFlockFish* aFish, AActor* aPrey) : Cardumen(aFish)
+	ChaseState(AFlockFish* aFish, AActor* aPrey) : NoneCardumen(aFish)
 	{
 		Prey = aPrey;
 	};

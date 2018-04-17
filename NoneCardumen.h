@@ -48,7 +48,7 @@ public:
 //////////////                                        ////////////////////              
 /////////////////////////////////////////////////////////////////////////
 
-class SeekState : public FishState
+class SeekState : public NoneCardumen
 {
 public:
 
@@ -75,7 +75,7 @@ protected:
 
 public:
 
-	FleeState(AFlockFish* aFish, AActor* aEnemy) : NoneCardumen(aFish)
+	FleeState(APawnPez* aFish, AActor* aEnemy) : NoneCardumen(aFish)
 	{
 		Enemy = aEnemy;
 	};
@@ -101,7 +101,7 @@ protected:
 
 public:
 
-	ChaseState(AFlockFish* aFish, AActor* aPrey) : NoneCardumen(aFish)
+	ChaseState(APawnPez* aFish, AActor* aPrey) : NoneCardumen(aFish)
 	{
 		Prey = aPrey;
 	};

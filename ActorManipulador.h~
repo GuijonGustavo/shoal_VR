@@ -65,7 +65,7 @@ public:
 	float getMaxZ();
 
 	/** Constructor */
-	AActorManipulador(const FObjectInitializer& ObjectInitializer);
+	AFishManager(const FObjectInitializer& ObjectInitializer);
 
 protected:
 

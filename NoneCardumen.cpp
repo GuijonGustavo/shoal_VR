@@ -74,7 +74,7 @@ void SeekState::Flock(float delta)
 	}
 
 	// Maintain distance behind Leader
-	FVector distBehind = (Cast<AFlockFish>(Fish->leader)->getVelocity() * -1);
+	FVector distBehind = (Cast<APawnPez>(Fish->leader)->getVelocity() * -1);
 	distBehind.Normalize();
 	distBehind *= Fish->followDist;
 
