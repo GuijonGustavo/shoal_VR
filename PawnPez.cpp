@@ -23,7 +23,7 @@
 
 APawnPez::APawnPez(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	base = ObjectInitializer.CreateDefaultSubobject<UStaticMeshComponent>(this, TEXT("FishMesh"));
+	base = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("FishMesh"));
 	RootComponent = base;
 
 	// Fish interaction sphere
