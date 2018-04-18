@@ -1,5 +1,5 @@
 /*=================================================
-* FileName: PawnPez.cpp
+* FileName: Pez.cpp
 * 
 * Created by: Gustavo Magallanes Guijón
 * Project name: OceanProject
@@ -8,9 +8,9 @@
 
 * =================================================*/
 
-#include "PawnPez.h"
-#include "NoneCardumen.h"
-#include "ActorManipulador.h"
+#include "Pez.h"
+#include "PezState.h"
+#include "Manejador.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/SphereComponent.h"
@@ -21,7 +21,7 @@
 
 #define COLLISION_TRACE ECC_GameTraceChannel4
 
-APawnPez::APawnPez(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+APez::APez(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	base = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("FishMesh"));
 	RootComponent = base;
@@ -30,8 +30,8 @@ APawnPez::APawnPez(const FObjectInitializer& ObjectInitializer) : Super(ObjectIn
 	FishInteractionSphere = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("FishInteractionSphere"));
 	FishInteractionSphere->SetSphereRadius(10);
 	FishInteractionSphere->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform, NAME_None);
-	FishInteractionSphere->OnComponentBeginOverlap.AddDynamic(this, &APawnPez::OnBeginOverlap);
-	FishInteractionSphere->OnComponentEndOverlap.AddDynamic(this, &APawnPez::OnEndOverlap);
+	FishInteractionSphere->OnComponentBeginOverlap.AddDynamic(this, &APez::OnBeginOverlap);
+	FishInteractionSphere->OnComponentEndOverlap.AddDynamic(this, &APez::OnEndOverlap);
 
 	if (isLeader == true)
 	{
@@ -74,10 +74,10 @@ APawnPez::APawnPez(const FObjectInitializer& ObjectInitializer) : Super(ObjectIn
 	isSetup = false;
 	hungerTimer = 0.0;
 	updateTimer = 0.0;
-	hasActorManipulador = false;
+	hasFishManager = false;
 }
 
-void APawnPez::Tick(float delta)
+void APez::Tick(float delta)
 {
 
 	// Setup the fish (happens on first tick only)
@@ -106,7 +106,7 @@ void APawnPez::Tick(float delta)
 	Super::Tick(delta);
 }
 
-void APawnPez::Debug()
+void APez::Debug()
 {
 	if (DebugMode)
 	{
@@ -151,7 +151,7 @@ void APawnPez::Debug()
 
 }
 
-FVector APawnPez::AvoidObstacle()
+FVector APez::AvoidObstacle()
 {
 	FVector actorLocation = this->GetActorLocation();
 	FVector forwardVector = (this->GetActorForwardVector() * AvoidanceDistance) + actorLocation;
@@ -199,7 +199,7 @@ FVector APawnPez::AvoidObstacle()
 	return FVector(0, 0, 0);
 }
 
-void APawnPez::UpdateState(float delta)
+void APez::UpdateState(float delta)
 {
 	if (UpdateEveryTick == 0)
 	{
@@ -213,7 +213,7 @@ void APawnPez::UpdateState(float delta)
 }
 
 
-void APawnPez::OnBeginOverlap(UPrimitiveComponent* activatedComp, AActor* otherActor, UPrimitiveComponent* otherComp, int32 otherBodyIndex, bool bFromSweep, const FHitResult& sweepResult)
+void APez::OnBeginOverlap(UPrimitiveComponent* activatedComp, AActor* otherActor, UPrimitiveComponent* otherComp, int32 otherBodyIndex, bool bFromSweep, const FHitResult& sweepResult)
 {
 	// Is overlapping with enemy?
 	if (enemyTypes.Find(otherActor->GetClass()) >= 0)
@@ -224,7 +224,7 @@ void APawnPez::OnBeginOverlap(UPrimitiveComponent* activatedComp, AActor* otherA
 	{	
 		if (otherActor->GetClass() == this->GetClass())
 		{
-			if (!Cast<APawnPez>(otherActor)->isLeader)
+			if (!Cast<AFlockFish>(otherActor)->isLeader)
 			{
 				nearbyPrey.Add(otherActor);
 			}
@@ -240,7 +240,7 @@ void APawnPez::OnBeginOverlap(UPrimitiveComponent* activatedComp, AActor* otherA
 	}
 }
 
-void APawnPez::OnEndOverlap(UPrimitiveComponent* activatedComp, AActor* otherActor, UPrimitiveComponent* otherComp, int32 otherBodyIndex)
+void APez::OnEndOverlap(UPrimitiveComponent* activatedComp, AActor* otherActor, UPrimitiveComponent* otherComp, int32 otherBodyIndex)
 {
 	if (nearbyEnemies.Find(otherActor) >= 0)
 	{
@@ -256,7 +256,7 @@ void APawnPez::OnEndOverlap(UPrimitiveComponent* activatedComp, AActor* otherAct
 	}
 }
 
-void APawnPez::ChooseState()
+void APez::ChooseState()
 {
 	if (nearbyEnemies.IsValidIndex(0))
 	{
@@ -272,7 +272,7 @@ void APawnPez::ChooseState()
 	}
 }
 
-void APawnPez::ManageTimers(float delta)
+void APez::ManageTimers(float delta)
 {
 	// Check if the fish is full or not
 	if (isFull)
@@ -299,15 +299,15 @@ void APawnPez::ManageTimers(float delta)
 
 
 
-void APawnPez::MoveBounds(float delta)
+void APez::MoveBounds(float delta)
 {
-	if (hasActorManipulador)
+	if (hasManejador)
 	{
-		FVector fishManagerPosition = fishManager->GetActorLocation();
-		maxX = fishManagerPosition.X + underwaterBoxLength;
-		minX = fishManagerPosition.X - underwaterBoxLength;
-		maxY = fishManagerPosition.Y + underwaterBoxLength;
-		minY = fishManagerPosition.Y - underwaterBoxLength;
+		FVector manejadorPosition = manejador->GetActorLocation();
+		maxX = manejadorPosition.X + underwaterBoxLength;
+		minX = manejadorPosition.X - underwaterBoxLength;
+		maxY = manejadorPosition.Y + underwaterBoxLength;
+		minY = manejadorPosition.Y - underwaterBoxLength;
 
 		FVector actorLocation = this->GetActorLocation();
 		if (actorLocation.Z > underwaterMax.Z)
@@ -341,13 +341,13 @@ void APawnPez::MoveBounds(float delta)
 	}
 }
 
-void APawnPez::spawnTarget()
+void APez::spawnTarget()
 {
 	target = FVector(FMath::FRandRange(minX, maxX), FMath::FRandRange(minY, maxY), FMath::FRandRange(minZ, maxZ));
 }
 
 
-void APawnPez::Setup()
+void APez::Setup()
 {
 	// Setup the enemies list on first tick
 	if (isSetup == false)
@@ -376,23 +376,23 @@ void APawnPez::Setup()
 
 		currentState = new SeekState(this);
 
-		TArray<AActor*> aActorManipuladorList;
-		UGameplayStatics::GetAllActorsOfClass(this, AActorManipulador::StaticClass(), aActorManipuladorList);
-		if (aActorManipuladorList.Num() > 0)
+		TArray<AActor*> aFishManagerList;
+		UGameplayStatics::GetAllActorsOfClass(this, AManejador::StaticClass(), aManejadorList);
+		if (aManejadorList.Num() > 0)
 		{
-			hasActorManipulador = true;
-			fishManager = aActorManipuladorList[0];
+			hasManejador = true;
+			manejador = aManejadorList[0];
 		}
 
 		// Setup Neighbors
-		if (!fishManager)
+		if (!manejador)
 		{
 			TArray<AActor*> aNeighborList;
 			UGameplayStatics::GetAllActorsOfClass(this, neighborType, aNeighborList);
 			neighbors.Append(aNeighborList);
 			for (int i = 0; i < neighbors.Num(); i++)
 			{
-				if (Cast<APawnPez>(neighbors[i])->isLeader)
+				if (Cast<APez>(neighbors[i])->isLeader)
 				{
 					leader = neighbors[i];
 					break;

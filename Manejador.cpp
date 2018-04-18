@@ -1,5 +1,5 @@
 /*=================================================
-* FileName: ActorManipulador.cpp
+* FileName: Manejador.cpp
 * 
 * Created by: Gustavo Magallanes Guijón
 * Project name: Cardumen
@@ -8,18 +8,18 @@
 *
 * =================================================*/
 
-#include "ActorManipulador.h"
-#include "PawnPez.h"
+#include "Manejador.h"
+#include "Pez.h"
 #include "Classes/Kismet/GameplayStatics.h"
 #include "Classes/Engine/World.h"
 
 
-AActorManipulador::AActorManipulador(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+AManejador::AManejador(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-void AActorManipulador::Tick(float val)
+void AManejador::Tick(float val)
 {
 	setup();
 
@@ -29,23 +29,23 @@ void AActorManipulador::Tick(float val)
 	}
 }
 
-void AActorManipulador::moveToPlayer()
+void AManejador::moveToPlayer()
 {
 	if (player)
 		this->SetActorLocation(player->GetActorLocation());
 }
 
-float AActorManipulador::getMinZ()
+float AManejador::getMinZ()
 {
 	return minZ;
 }
 
-float AActorManipulador::getMaxZ()
+float AManejador::getMaxZ()
 {
 	return maxZ;
 }
 
-void AActorManipulador::setup()
+void AManejador::setup()
 {
 	if (isSetup == false){
 		if (!areFishSpawned)
@@ -60,10 +60,10 @@ void AActorManipulador::setup()
 			for (int i = 0; i < numFlocks; i++)
 			{
 				FVector spawnLoc = FVector(FMath::FRandRange(minX, maxX), FMath::FRandRange(minY, maxY), FMath::FRandRange(minZ, maxZ));
-				APawnPez *leaderFish = NULL;
+				APez *leaderFish = NULL;
 				for (int j = 0; j < numInFlock[i]; j++)
 				{
-					APawnPez *aFish = Cast<APawnPez>(world->SpawnActor(flockTypes[i]));
+					APez *aFish = Cast<APez>(world->SpawnActor(flockTypes[i]));
 					aFish->isLeader = false;
 					aFish->DebugMode = DebugMode;
 					aFish->underwaterMax = FVector(maxX, maxY, maxZ);

@@ -1,5 +1,5 @@
 /*=================================================
-* FileName: ActorManipulador.h
+* FileName: Manejador.h
 * 
 * Created by: Gustavo Magallanes Guijón
 * Project name: Cardumen
@@ -12,11 +12,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "ActorManipulador.generated.h"
+#include "Manejador.generated.h"
 
 
+/**
+ * 
+ */
 UCLASS()
-class AActorManipulador : public AActor
+class AManejador : public AActor
 {
 	GENERATED_BODY()
 
@@ -65,7 +68,7 @@ public:
 	float getMaxZ();
 
 	/** Constructor */
-	AFishManager(const FObjectInitializer& ObjectInitializer);
+	AManejador(const FObjectInitializer& ObjectInitializer);
 
 protected:
 

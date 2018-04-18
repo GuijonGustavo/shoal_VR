@@ -1,5 +1,5 @@
 /*=================================================
-* FileName: PawnPez.h
+* FileName: Pez.h
 * 
 * Created by: Gustavo Magallanes Guijón
 * Project name: Cardumen
@@ -11,20 +11,20 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "ActorManipulador.h"
-#include "PawnPez.generated.h"
+#include "Manejador.h"
+#include "Pez.generated.h"
 
 
 /**
  * 
  */
 UCLASS()
-class APawnPez : public APawn
+class AFlockFish : public APawn
 {
 	GENERATED_BODY()
 
 	// Current state of the Fish
-	class NoneCardumen* currentState;
+	class PezState* currentState;
 
 	/** Static mesh component */
 	class USkeletalMeshComponent* base;
@@ -204,7 +204,7 @@ public:
 	float minZ;
 
 	/** Constructor */
-	APawnPez(const FObjectInitializer& ObjectInitializer);
+	APez(const FObjectInitializer& ObjectInitializer);
 
 	// Getters and Setters
 	FVector getSeekTarget()
@@ -212,7 +212,7 @@ public:
 		return target;
 	}
 
-	void setState(class NoneCardumen* newState)
+	void setState(class FishState* newState)
 	{
 		currentState = newState;
 	}
@@ -290,10 +290,10 @@ protected:
 	//AActor* player;
 
 	// has fish manager?
-	bool hasActorManipulador;
+	bool hasManejador;
 
 	// fish manager
-	AActor* fishManager;
+	AActor* manejador;
 
 
 };

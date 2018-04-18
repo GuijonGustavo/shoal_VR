@@ -1,5 +1,5 @@
 /*=================================================
-* FileName: NoneCardumen.cpp
+* FileName: PezState.cpp
 * 
 * Created by: Gustavo Magallanes Guijón
 * Project name: Cardumen
@@ -8,10 +8,8 @@
 *
 * =================================================*/
 
-#include "NoneCardumen.h"
-#include "PawnPez.h"
-
-//////////////            Estado de búsqueda             /////////////////////                                 
+#include "PezState.h"
+#include "Pez.h"
 
 void SeekState::Update(float delta)
 {	
@@ -74,7 +72,7 @@ void SeekState::Flock(float delta)
 	}
 
 	// Maintain distance behind Leader
-	FVector distBehind = (Cast<APawnPez>(Fish->leader)->getVelocity() * -1);
+	FVector distBehind = (Cast<AFlockFish>(Fish->leader)->getVelocity() * -1);
 	distBehind.Normalize();
 	distBehind *= Fish->followDist;
 
@@ -107,8 +105,6 @@ void SeekState::Flock(float delta)
 }
 
 
-//////////////            Estado de huida          /////////////////////                                 
-
 void FleeState::Update(float delta)
 {
 	Fish->isFleeing = true;
@@ -138,7 +134,6 @@ void FleeState::FleeFromEnemy(float delta)
 
 }
 
-//////////////            Estado de caza            /////////////////////                                 
 
 void ChaseState::Update(float delta)
 {
