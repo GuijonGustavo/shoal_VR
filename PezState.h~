@@ -73,18 +73,18 @@ protected:
 class ChaseState : public PezState
 {
 protected:
-	AActor* Presa;
+	AActor* Prey;
 
 public:
 
-	ChaseState(APez* aFish, AActor* aPresa) : PezState(aFish)
+	ChaseState(APez* aFish, AActor* aPrey) : PezState(aFish)
 	{
-		Presa = aPresa;
+		Prey = aPrey;
 	};
 	virtual void Update(float delta) override;
 
 protected:
 
-	virtual void ChasePresa(float delta);
-	virtual void EatPresa();
+	virtual void ChasePrey(float delta);
+	virtual void EatPrey();
 };

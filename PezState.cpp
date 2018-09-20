@@ -13,179 +13,160 @@
 
 void SeekState::Update(float delta)
 {	
-	Fish->isFleeing = false;
-	Fish->fleeTarget = NULL;
-	Fish->preyTarget = NULL;
+	Pez->isFleeing = false;
+	Pez->fleeTarget = NULL;
+	Pez->preyTarget = NULL;
 
-	if (Fish->isLeader)
+	if (Pez->isLeader)
 	{
-		// Seek target
 		SeekTarget(delta);
 	}
 	else
 	{
-		// School with buddies
 		Flock(delta);
 	}
 }
 
 void SeekState::SeekTarget(float delta)
 {	
-	// Set Speed
-	Fish->curSpeed = FMath::Lerp(Fish->curSpeed, Fish->speed, delta * Fish->SeekDecelerationMultiplier);
+	Pez->curSpeed = FMath::Lerp(Pez->curSpeed, Pez->speed, delta * Pez->SeekDecelerationMultiplier);
 
-	// Set Rotation 
-	FVector targetRotation = (Fish->getSeekTarget() - Fish->GetActorLocation() + Fish->AvoidObstacle());
+	FVector targetRotation = (Pez->getSeekTarget() - Pez->GetActorLocation() + Pez->AvoidObstacle());
 	FRotator leaderRotation = FRotationMatrix::MakeFromX(targetRotation).Rotator();
-	leaderRotation = FMath::RInterpTo(Fish->GetActorRotation(), leaderRotation, delta, Fish->turnSpeed);
-	Fish->setRotation(leaderRotation);
+	leaderRotation = FMath::RInterpTo(Pez->GetActorRotation(), leaderRotation, delta, Pez->turnSpeed);
+	Pez->setRotation(leaderRotation);
 
-	// Set Velocity Vector
-	FVector leaderVelocity = Fish->GetActorForwardVector() * (delta * Fish->curSpeed);
-	Fish->setVelocity(leaderVelocity);
+	FVector leaderVelocity = Pez->GetActorForwardVector() * (delta * Pez->curSpeed);
+	Pez->setVelocity(leaderVelocity);
 }
 
 void SeekState::Flock(float delta)
 {
-	// Get a list of Fish neighbors and calculate seperation
 	FVector seperation = FVector(0, 0, 0);
-	if (Fish->nearbyFriends.IsValidIndex(0))
+	if (Pez->nearbyFriends.IsValidIndex(0))
 	{
-		TArray<AActor*> neighborList = Fish->nearbyFriends;
+		TArray<AActor*> neighborList = Pez->nearbyFriends;
 		int neighborCount = 0;
-		for (int i = 0; i < Fish->nearbyFriends.Num(); i++)
+		for (int i = 0; i < Pez->nearbyFriends.Num(); i++)
 		{
 			if (neighborList.IsValidIndex(i))
 			{
-				seperation += neighborList[i]->GetActorLocation() - Fish->GetActorLocation();
+				seperation += neighborList[i]->GetActorLocation() - Pez->GetActorLocation();
 				neighborCount++;
 			}
 
-			if (i == Fish->NumNeighborsToEvaluate && i != 0)
+			if (i == Pez->NumNeighborsToEvaluate && i != 0)
 			{
 				break;
 			}
 		}
 		seperation = ((seperation / neighborCount) * -1);
 		seperation.Normalize();
-		seperation *= Fish->neighborSeperation;
+		seperation *= Pez->neighborSeperation;
 	}
 
-	// Maintain distance behind Leader
-	FVector distBehind = (Cast<AFlockFish>(Fish->leader)->getVelocity() * -1);
+	FVector distBehind = (Cast<APez>(Pez->leader)->getVelocity() * -1);
 	distBehind.Normalize();
-	distBehind *= Fish->followDist;
+	distBehind *= Pez->followDist;
 
-	// Calculate all seperation and distance behind leader into one vector
-	FVector leaderLocation = Fish->leader->GetActorLocation();
-	FVector flockerVelocity = distBehind + leaderLocation + seperation + Fish->AvoidObstacle();
-	FRotator flockerRotation = FRotationMatrix::MakeFromX(flockerVelocity - Fish->GetActorLocation()).Rotator();
+	FVector leaderLocation = Pez->leader->GetActorLocation();
+	FVector flockerVelocity = distBehind + leaderLocation + seperation + Pez->AvoidObstacle();
+	FRotator flockerRotation = FRotationMatrix::MakeFromX(flockerVelocity - Pez->GetActorLocation()).Rotator();
 
-	// If fish is too far behind leader, speed up 
-	float newSpeed = Fish->speed;
-	if (Fish->GetDistanceTo(Fish->leader) > Fish->distBehindSpeedUpRange)
+	float newSpeed = Pez->speed;
+	if (Pez->GetDistanceTo(Pez->leader) > Pez->distBehindSpeedUpRange)
 	{
-		// Set Speed
-		Fish->curSpeed = FMath::Lerp(Fish->curSpeed, Fish->maxSpeed, delta);
+		Pez->curSpeed = FMath::Lerp(Pez->curSpeed, Pez->maxSpeed, delta);
 	}
 	else
 	{
-		// Set Speed
-		Fish->curSpeed = FMath::Lerp(Fish->curSpeed, Fish->speed, delta);
+		Pez->curSpeed = FMath::Lerp(Pez->curSpeed, Pez->speed, delta);
 	}
 
 
-	// Set Velocity
-	FVector flockVelocity = Fish->GetActorForwardVector() * (delta * Fish->curSpeed);
-	Fish->setVelocity(flockVelocity);
+	FVector flockVelocity = Pez->GetActorForwardVector() * (delta * Pez->curSpeed);
+	Pez->setVelocity(flockVelocity);
 
-	// Set Rotation
-	FRotator flockRotation = FMath::RInterpTo(Fish->GetActorRotation(), flockerRotation, delta, Fish->turnSpeed);
-	Fish->setRotation(flockRotation);
+	FRotator flockRotation = FMath::RInterpTo(Pez->GetActorRotation(), flockerRotation, delta, Pez->turnSpeed);
+	Pez->setRotation(flockRotation);
 }
 
 
 void FleeState::Update(float delta)
 {
-	Fish->isFleeing = true;
-	Fish->fleeTarget = Enemy;
-	Fish->preyTarget = NULL;
-	if (Fish->GetDistanceTo(Enemy) >= Fish->fleeDistance)
+	Pez->isFleeing = true;
+	Pez->fleeTarget = Enemy;
+	Pez->preyTarget = NULL;
+	if (Pez->GetDistanceTo(Enemy) >= Pez->fleeDistance)
 	{
-		Fish->setState(new SeekState(Fish));
+		Pez->setState(new SeekState(Pez));
 	}
 	FleeFromEnemy(delta);
 }
 
 void FleeState::FleeFromEnemy(float delta)
 {
-	// Set Speed
-	Fish->curSpeed = FMath::Lerp(Fish->curSpeed, Fish->maxSpeed, (delta * Fish->FleeAccelerationMultiplier));
+	Pez->curSpeed = FMath::Lerp(Pez->curSpeed, Pez->maxSpeed, (delta * Pez->FleeAccelerationMultiplier));
 	
-	// Set Velocity
-	FVector fleeVelocity = Fish->GetActorForwardVector() * (delta * Fish->curSpeed);
-	Fish->setVelocity(fleeVelocity);
+	FVector fleeVelocity = Pez->GetActorForwardVector() * (delta * Pez->curSpeed);
+	Pez->setVelocity(fleeVelocity);
 
-	// Set Rotation
-	FVector targetRotation = (Fish->GetActorLocation() - Enemy->GetActorLocation()) + Fish->AvoidObstacle();
+	FVector targetRotation = (Pez->GetActorLocation() - Enemy->GetActorLocation()) + Pez->AvoidObstacle();
 	FRotator fleeRotation = FRotationMatrix::MakeFromX(targetRotation).Rotator();
-	fleeRotation = FMath::RInterpTo(Fish->GetActorRotation(), fleeRotation, delta, Fish->turnSpeed);
-	Fish->setRotation(fleeRotation);
+	fleeRotation = FMath::RInterpTo(Pez->GetActorRotation(), fleeRotation, delta, Pez->turnSpeed);
+	Pez->setRotation(fleeRotation);
 
 }
 
 
 void ChaseState::Update(float delta)
 {
-	Fish->isFleeing = false;
-	Fish->fleeTarget = NULL;
-	Fish->preyTarget = Prey;
+	Pez->isFleeing = false;
+	Pez->fleeTarget = NULL;
+	Pez->preyTarget = Prey;
 	EatPrey();
 	ChasePrey(delta);
 }
 
 void ChaseState::EatPrey()
 {
-	if (Fish->GetDistanceTo(Prey) < 1000)
+	if (Pez->GetDistanceTo(Prey) < 1000)
 	{
-		float zLoc = Fish->minZ + FMath::Abs(0.25 * Fish->maxZ);
-		Prey->SetActorLocation(FVector(FMath::FRandRange(Fish->minX, Fish->maxX), FMath::FRandRange(Fish->minY, Fish->maxX), zLoc));
-		Fish->isFull = true;
-		Fish->setState(new SeekState(Fish));
+		float zLoc = Pez->minZ + FMath::Abs(0.25 * Pez->maxZ);
+		Prey->SetActorLocation(FVector(FMath::FRandRange(Pez->minX, Pez->maxX), FMath::FRandRange(Pez->minY, Pez->maxX), zLoc));
+		Pez->isFull = true;
+		Pez->setState(new SeekState(Pez));
 	}
 }
 
 void ChaseState::ChasePrey(float delta)
 {
-	// Set Speed
-	Fish->curSpeed = FMath::Lerp(Fish->curSpeed, Fish->maxSpeed, (delta * Fish->ChaseAccelerationMultiplier));
+	Pez->curSpeed = FMath::Lerp(Pez->curSpeed, Pez->maxSpeed, (delta * Pez->ChaseAccelerationMultiplier));
 
-	// Set Velocity
-	FVector chaseVelocity = Fish->GetActorForwardVector() * (delta * Fish->curSpeed);
-	Fish->setVelocity(chaseVelocity);
+	FVector chaseVelocity = Pez->GetActorForwardVector() * (delta * Pez->curSpeed);
+	Pez->setVelocity(chaseVelocity);
 
-	// Set Rotation
 	FVector seperation = FVector(0, 0, 0);
-	if (Fish->nearbyFriends.IsValidIndex(0))
+	if (Pez->nearbyFriends.IsValidIndex(0))
 	{
 		int neighborCount = 0;
-		TArray<AActor*> neighborList = Fish->nearbyFriends;
-		for (int i = 0; i < Fish->NumNeighborsToEvaluate; i++)
+		TArray<AActor*> neighborList = Pez->nearbyFriends;
+		for (int i = 0; i < Pez->NumNeighborsToEvaluate; i++)
 		{
 			if (neighborList.IsValidIndex(i))
 			{
-				seperation += neighborList[i]->GetActorLocation() - Fish->GetActorLocation();
+				seperation += neighborList[i]->GetActorLocation() - Pez->GetActorLocation();
 				neighborCount++;
 			}
 		}
 		seperation = ((seperation / neighborCount) * -1);
 		seperation.Normalize();
-		seperation *= Fish->neighborSeperation;
+		seperation *= Pez->neighborSeperation;
 	}
 
 	FVector preyLocation = Prey->GetActorLocation();
-	FVector flockerVelocity = ((preyLocation + seperation) - Fish->GetActorLocation()) + Fish->AvoidObstacle();
+	FVector flockerVelocity = ((preyLocation + seperation) - Pez->GetActorLocation()) + Pez->AvoidObstacle();
 	FRotator flockerRotation = FRotationMatrix::MakeFromX(flockerVelocity).Rotator();
-	FRotator chaseRotation = FMath::RInterpTo(Fish->GetActorRotation(), flockerRotation, delta, Fish->turnSpeed);
-	Fish->setRotation(chaseRotation);
+	FRotator chaseRotation = FMath::RInterpTo(Pez->GetActorRotation(), flockerRotation, delta, Pez->turnSpeed);
+	Pez->setRotation(chaseRotation);
 }

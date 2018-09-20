@@ -23,36 +23,83 @@
 
 APez::APez(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	base = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("PezMesh"));
+	base = ObjectInitializer.CreateDefaultSubobject<USkeletalMeshComponent>(this, TEXT("FishMesh"));
 	RootComponent = base;
 
-	PezInteractionSphere = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("PezInteractionSphere"));
-	PezInteractionSphere->SetSphereRadius(10);
-	PezInteractionSphere->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform, NAME_None);
-	PezInteractionSphere->OnComponentBeginOverlap.AddDynamic(this, &APez::OnBeginOverlap);
-	PezInteractionSphere->OnComponentEndOverlap.AddDynamic(this, &APez::OnEndOverlap);
+	// Fish interaction sphere
+	FishInteractionSphere = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("FishInteractionSphere"));
+	FishInteractionSphere->SetSphereRadius(10);
+	FishInteractionSphere->AttachToComponent(RootComponent, FAttachmentTransformRules::KeepRelativeTransform, NAME_None);
+	FishInteractionSphere->OnComponentBeginOverlap.AddDynamic(this, &APez::OnBeginOverlap);
+	FishInteractionSphere->OnComponentEndOverlap.AddDynamic(this, &APez::OnEndOverlap);
 
 	if (isLeader == true)
 	{
 		spawnTarget();
 	}
+
+	//Defaults
+	followDist = 50.0;
+	speed = 1200.0;
+	maxSpeed = 2400.0;
+	turnSpeed = 3.0;
+	turnFrequency = 1.0;
+	turnFrequency = 1.0;
+	hungerResetTime = 20.0;
+	distBehindSpeedUpRange = 3000.0;
+	SeperationDistanceMultiplier = 0.75;
+	FleeDistanceMultiplier = 5.0;
+	FleeAccelerationMultiplier = 2.0;
+	ChaseAccelerationMultiplier = 2.0;
+	SeekDecelerationMultiplier = 1.0;
+	AvoidForceMultiplier = 1.0;
+	AvoidanceForce = 20000.0;
+	underwaterMin = FVector(-40000, -40000, -9000);
+	underwaterMax = FVector(40000, 40000, -950);
+	CustomZSeekMin = 0.0;
+	CustomZSeekMax = 0.0;
+	NumNeighborsToEvaluate = 5.0;
+	UpdateEveryTick = 0.0;
+	DebugMode = true;
+	fleeDistance = 0.0;
+	neighborSeperation = 300.0;
+	curSpeed = speed;
+	isFleeing = false;
+	isFull = false;
+	limitesPecera = 10000.0;
+	AvoidanceDistance = 5000.0;
+	curVelocity = FVector(0, 0, 0);
+	curRotation = FRotator(0, 0, 0);
+	turnTimer = 0.0;
+	isSetup = false;
+	hungerTimer = 0.0;
+	updateTimer = 0.0;
+	hasManejador = false;
 }
 
 void APez::Tick(float delta)
 {
 
+	// Setup the fish (happens on first tick only)
+	// NOTE TO SELF: consider creating a beginplay event that does this stuff (although beginplay is buggy as hell x.x)
 	Setup();
 
+	// If debug mode true, draw interaction sphere and avoiddistance
 	Debug();
 
+	// Move Bounds based on location of FishManager (if applicable)
 	MoveBounds(delta);
 
+	// Manage Timers (hungerTimer, updateTimer, and turnTimer)
 	ManageTimers(delta);
 
+	// Decide what state to be in
 	ChooseState();
 
+	// Update curVelocity and curRotation through current state
 	UpdateState(delta);
 
+	// Update world rotation and velocity
 	this->SetActorRotation(curRotation);
 	this->AddActorWorldOffset(curVelocity);
 
@@ -77,18 +124,18 @@ void APez::Debug()
 			);
 
 		FColor indicatorColor = FColor::Cyan;
-		if (Depredarores.IsValidIndex(0))
+		if (nearbyEnemies.IsValidIndex(0))
 		{
 			indicatorColor = FColor::Red;
 		}
-		else if (Presas.IsValidIndex(0) && isFull == false)
+		else if (nearbyPrey.IsValidIndex(0) && isFull == false)
 		{
 			indicatorColor = FColor::Green;
 		}
 		DrawDebugSphere(
 			GetWorld(),
 			actorLocation,
-			PezInteractionSphere->GetScaledSphereRadius(),
+			FishInteractionSphere->GetScaledSphereRadius(),
 			20,
 			indicatorColor
 			);
@@ -116,11 +163,11 @@ FVector APez::AvoidObstacle()
 	float distanceToBound = distanceToBound = (this->GetActorLocation() - OutHitResult.ImpactPoint).Size();
 	if (bHadBlockingHit)
 	{
-		if (OutHitResult.ImpactPoint.Z > this->GetActorLocation().Z + PezInteractionSphere->GetScaledSphereRadius())
+		if (OutHitResult.ImpactPoint.Z > this->GetActorLocation().Z + FishInteractionSphere->GetScaledSphereRadius())
 		{	
 			returnVector.Z += (1 / (distanceToBound * (1 / AvoidForceMultiplier))) * -1;
 		}
-		else if (OutHitResult.ImpactPoint.Z < this->GetActorLocation().Z - PezInteractionSphere->GetScaledSphereRadius())
+		else if (OutHitResult.ImpactPoint.Z < this->GetActorLocation().Z - FishInteractionSphere->GetScaledSphereRadius())
 		{
 			returnVector.Z += (1 / (distanceToBound * (1 / AvoidForceMultiplier))) * 1;
 		}
@@ -168,9 +215,10 @@ void APez::UpdateState(float delta)
 
 void APez::OnBeginOverlap(UPrimitiveComponent* activatedComp, AActor* otherActor, UPrimitiveComponent* otherComp, int32 otherBodyIndex, bool bFromSweep, const FHitResult& sweepResult)
 {
+	// Is overlapping with enemy?
 	if (enemyTypes.Find(otherActor->GetClass()) >= 0)
 	{	
-		Depredarores.Add(otherActor);
+		nearbyEnemies.Add(otherActor);
 	}
 	else if (preyTypes.Find(otherActor->GetClass()) >= 0)
 	{	
@@ -178,12 +226,12 @@ void APez::OnBeginOverlap(UPrimitiveComponent* activatedComp, AActor* otherActor
 		{
 			if (!Cast<APez>(otherActor)->isLeader)
 			{
-				Presas.Add(otherActor);
+				nearbyPrey.Add(otherActor);
 			}
 		}
 		else
 		{
-			Presas.Add(otherActor);
+			nearbyPrey.Add(otherActor);
 		}
 	}
 	else if (otherActor->GetClass() == this->GetClass())
@@ -194,13 +242,13 @@ void APez::OnBeginOverlap(UPrimitiveComponent* activatedComp, AActor* otherActor
 
 void APez::OnEndOverlap(UPrimitiveComponent* activatedComp, AActor* otherActor, UPrimitiveComponent* otherComp, int32 otherBodyIndex)
 {
-	if (Depredarores.Find(otherActor) >= 0)
+	if (nearbyEnemies.Find(otherActor) >= 0)
 	{
-		Depredarores.Remove(otherActor);
+		nearbyEnemies.Remove(otherActor);
 	}
-	else if (Presas.Find(otherActor) >= 0)
+	else if (nearbyPrey.Find(otherActor) >= 0)
 	{
-		Presas.Remove(otherActor);
+		nearbyPrey.Remove(otherActor);
 	}
 	else if (nearbyFriends.Find(otherActor) >= 0)
 	{
@@ -210,13 +258,13 @@ void APez::OnEndOverlap(UPrimitiveComponent* activatedComp, AActor* otherActor, 
 
 void APez::ChooseState()
 {
-	if (Depredarores.IsValidIndex(0))
+	if (nearbyEnemies.IsValidIndex(0))
 	{
-		currentState = new FleeState(this, Depredarores[0]);
+		currentState = new FleeState(this, nearbyEnemies[0]);
 	}
-	else if (Presas.IsValidIndex(0) && isFull == false)
+	else if (nearbyPrey.IsValidIndex(0) && isFull == false)
 	{
-		currentState = new ChaseState(this, Presas[0]);
+		currentState = new ChaseState(this, nearbyPrey[0]);
 	}
 	else
 	{
@@ -226,6 +274,7 @@ void APez::ChooseState()
 
 void APez::ManageTimers(float delta)
 {
+	// Check if the fish is full or not
 	if (isFull)
 	{
 		hungerTimer += delta;
@@ -237,6 +286,7 @@ void APez::ManageTimers(float delta)
 		}
 	}
 
+	// decide on wether to move target this tick
 	if (turnTimer >= turnFrequency && isLeader == true)
 	{
 		spawnTarget();
@@ -260,13 +310,13 @@ void APez::MoveBounds(float delta)
 		minY = manejadorPosition.Y - limitesPecera;
 
 		FVector actorLocation = this->GetActorLocation();
-		if (actorLocation.Z > limitesPeceraMax.Z)
+		if (actorLocation.Z > underwaterMax.Z)
 		{	
-			actorLocation.Z = limitesPeceraMin.Z + FMath::Abs((0.999 * limitesPeceraMax.Z));
+			actorLocation.Z = underwaterMin.Z + FMath::Abs((0.999 * underwaterMax.Z));
 		}
-		else if (actorLocation.Z < limitesPeceraMin.Z)
+		else if (actorLocation.Z < underwaterMin.Z)
 		{
-			actorLocation.Z = limitesPeceraMin.Z + FMath::Abs((0.001 * limitesPeceraMax.Z));
+			actorLocation.Z = underwaterMin.Z + FMath::Abs((0.001 * underwaterMax.Z));
 		}
 
 		if (actorLocation.X > maxX)
@@ -299,19 +349,20 @@ void APez::spawnTarget()
 
 void APez::Setup()
 {
+	// Setup the enemies list on first tick
 	if (isSetup == false)
 	{
-		maxX = limitesPeceraMax.X;
-		maxY = limitesPeceraMax.Y;
-		minX = limitesPeceraMin.X;
-		minY = limitesPeceraMin.Y;
+		maxX = underwaterMax.X;
+		maxY = underwaterMax.Y;
+		minX = underwaterMin.X;
+		minY = underwaterMin.Y;
 
-		InteractionSphereRadius = PezInteractionSphere->GetScaledSphereRadius();
+		InteractionSphereRadius = FishInteractionSphere->GetScaledSphereRadius();
 
 		if (CustomZSeekMax == 0.0)
 		{
-			minZ = limitesPeceraMin.Z;
-			maxZ = limitesPeceraMax.Z;
+			minZ = underwaterMin.Z;
+			maxZ = underwaterMax.Z;
 		}
 		else
 		{
@@ -319,9 +370,9 @@ void APez::Setup()
 			maxZ = CustomZSeekMax;
 		}
 
-		fleeDistance = PezInteractionSphere->GetScaledSphereRadius() * FleeDistanceMultiplier;
-		neighborSeperation = PezInteractionSphere->GetScaledSphereRadius() * SeperationDistanceMultiplier;
-		AvoidanceDistance = PezInteractionSphere->GetScaledSphereRadius() * 2;
+		fleeDistance = FishInteractionSphere->GetScaledSphereRadius() * FleeDistanceMultiplier;
+		neighborSeperation = FishInteractionSphere->GetScaledSphereRadius() * SeperationDistanceMultiplier;
+		AvoidanceDistance = FishInteractionSphere->GetScaledSphereRadius() * 2;
 
 		currentState = new SeekState(this);
 
@@ -333,6 +384,7 @@ void APez::Setup()
 			manejador = aManejadorList[0];
 		}
 
+		// Setup Neighbors
 		if (!manejador)
 		{
 			TArray<AActor*> aNeighborList;
@@ -347,6 +399,7 @@ void APez::Setup()
 				}
 			}
 		}
+		//nearbyFriends.Append(neighbors);
 
 
 		isSetup = true;
