@@ -28,86 +28,86 @@ class APez : public APawn
 	class USphereComponent* FishInteractionSphere;
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fish Attributes")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	bool isLeader;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fish Attributes")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	TArray<UClass*> enemyTypes;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fish Attributes")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	TArray<UClass*> preyTypes;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fish Attributes")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	UClass* neighborType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fish Attributes")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float followDist;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fish Attributes")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float speed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fish Attributes")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float maxSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fish Attributes")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float turnSpeed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fish Attributes")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float turnFrequency;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fish Attributes")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float hungerResetTime;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Fish Attributes")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float distBehindSpeedUpRange;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Advanced Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float SeperationDistanceMultiplier;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Advanced Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float FleeDistanceMultiplier;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Advanced Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float FleeAccelerationMultiplier;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Advanced Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float ChaseAccelerationMultiplier;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Advanced Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float SeekDecelerationMultiplier;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Advanced Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float AvoidForceMultiplier;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Advanced Settings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float AvoidanceForce;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Variables")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	UClass* playerType;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Variables")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	FVector underwaterMin;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Variables")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	FVector underwaterMax;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Variables")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float CustomZSeekMin;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Environment Variables")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float CustomZSeekMax;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Optimization")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float NumNeighborsToEvaluate;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Optimization")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	float UpdateEveryTick;
 
 	FVector target;
 
 	float InteractionSphereRadius;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "TESTING")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "")
 	bool DebugMode;
 
 	float fleeDistance;
